@@ -188,15 +188,54 @@ foreach ($json as $item) {
             $link = "trojan://{$pass}@{$addr}:{$port}?{$query}#" . rawurlencode($remark);
             $result[] = $link;
         }
+		
+		// SHADOWSOCKS
+		if ($protocol === 'shadowsocks') {
+
+			$srv = $out['settings']['servers'][0] ?? null;
+			if (!$srv) continue;
+
+			$addr = $srv['address'];
+			$port = $srv['port'];
+			$pass = $srv['password'];
+			$method = $srv['method'];
+
+			// base64(method:password)
+			$userInfo = base64_encode($method . ':' . $pass);
+
+			// Базовая ссылка
+			$link = "ss://{$userInfo}@{$addr}:{$port}";
+
+			// streamSettings (опционально)
+			$stream = $out['streamSettings'] ?? [];
+			$type = $stream['network'] ?? 'tcp';
+
+			$params = [];
+
+			// Если вдруг появится ws
+			if ($type === 'ws') {
+				$params['type'] = 'ws';
+				$params['path'] = $stream['wsSettings']['path'] ?? '';
+				$params['host'] = $stream['wsSettings']['headers']['Host'] ?? '';
+			}
+
+			// Если есть параметры — добавляем
+			if (!empty($params)) {
+				$link .= '?' . http_build_query($params);
+			}
+
+			$link .= '#' . rawurlencode($remark);
+			$result[] = $link;
+		}
     }
 }
 
 // Проксируем заголовки
 
-// удаляем encoding (мы уже распаковали)
+// Удаляем encoding (мы уже распаковали)
 header_remove('Content-Encoding');
 
-// заголовки, которые не надо передавать
+// Заголовки, которые не надо передавать
 $blockedHeaders = [
     'transfer-encoding',
     'content-length',
@@ -204,7 +243,7 @@ $blockedHeaders = [
     'connection',
 ];
 
-// берём последний блок (если были редиректы)
+// Берём последний блок (если были редиректы)
 $headerBlocks = explode("\r\n\r\n", trim($rawHeaders));
 $lastHeaders = end($headerBlocks);
 

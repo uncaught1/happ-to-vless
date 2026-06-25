@@ -1,14 +1,30 @@
 <?php
 ob_start();
 
+$mac = '';
+
+// Генерируем X-Hwid (эмуляция Happ) который зависит от MAC-адреса сетевухи роутера
+if (file_exists('/sys/class/net/br-lan/address')) {
+    $mac = trim(file_get_contents('/sys/class/net/br-lan/address'));
+} elseif (file_exists('/sys/class/net/eth0/address')) {
+    $mac = trim(file_get_contents('/sys/class/net/eth0/address'));
+}
+
+if (!$mac) {
+    $mac = php_uname('n');
+}
+
+$hwid = substr(md5(strtolower($mac)), 0, 17);
+
+// Заголовки запроса к подписке
 $headers = [
-    'User-Agent: Happ/3.17.0',
+    'User-Agent: Happ/3.24.1',
     'X-Device-Os: Android',
     'X-Device-Locale: ru',
     'X-Device-Model: ELP-NX1',
     'X-Ver-Os: 15',
     'Connection: close',
-    'X-Hwid: 74jf74nf8f4jr5je',
+    'X-Hwid: ' . $hwid,
     'X-Real-Ip: 101.202.303.404',
     'X-Forwarded-For: 101.202.303.404',
 ];
@@ -20,7 +36,7 @@ if (!$url) {
     die('Чтобы раскурить подписку Happ построчно в vless:// формат, введите:<br>http://[IP морды роутера]/happ_to_vless.php?url=[Ваша ссылка на подписку]');
 }
 
-// ===== запрос =====
+// Запрос к подписке
 $ch = curl_init();
 curl_setopt_array($ch, [
     CURLOPT_URL => $url, // Когда-то было htmlspecialchars
@@ -40,7 +56,7 @@ curl_setopt_array($ch, [
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
     CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 
-    // "Захват" заголовков (инфа о подписке)
+    // Захват заголовков (инфа о подписке)
     CURLOPT_HEADER => true,
 ]);
 
@@ -61,11 +77,11 @@ $body = substr($response, $headerSize);
 
 $response = $body;
 
-// Decode
+// Декодим
 $decoded = base64_decode($response, true);
 $data = $decoded ?: $response;
 
-// json
+// Жысон
 $json = json_decode($data, true);
 if (!$json) {
     die('Проблема с JSON');
@@ -73,7 +89,7 @@ if (!$json) {
 
 $result = [];
 
-// Перекуриваем JSON в список прямых подключений vless://
+// Перекуриваем JSON в список прямых подключений к серверам
 foreach ($json as $item) {
 
     if (!isset($item['outbounds'])) continue;
@@ -219,7 +235,7 @@ foreach ($json as $item) {
 				$params['host'] = $stream['wsSettings']['headers']['Host'] ?? '';
 			}
 
-			// Если есть параметры — добавляем
+			// Если есть параметры - добавляем
 			if (!empty($params)) {
 				$link .= '?' . http_build_query($params);
 			}

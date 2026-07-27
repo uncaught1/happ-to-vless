@@ -18,15 +18,13 @@ $hwid = substr(md5(strtolower($mac)), 0, 17);
 
 // Заголовки запроса к подписке
 $headers = [
-    'User-Agent: Happ/3.24.1',
+    'User-Agent: Happ/3.26.3',
     'X-Device-Os: Android',
     'X-Device-Locale: ru',
     'X-Device-Model: ELP-NX1',
     'X-Ver-Os: 15',
     'Connection: close',
     'X-Hwid: ' . $hwid,
-    'X-Real-Ip: 101.202.303.404',
-    'X-Forwarded-For: 101.202.303.404',
 ];
 
 $timeout = 30;

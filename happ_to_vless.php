@@ -18,7 +18,7 @@ $hwid = substr(md5(strtolower($mac)), 0, 17);
 
 // Заголовки запроса к подписке
 $headers = [
-    'User-Agent: Happ/3.26.3',
+    'User-Agent: Happ/4.3.0',
     'X-Device-Os: Android',
     'X-Device-Locale: ru',
     'X-Device-Model: ELP-NX1',

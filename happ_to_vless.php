@@ -18,7 +18,7 @@ $hwid = substr(md5(strtolower($mac)), 0, 17);
 
 // Заголовки запроса к подписке
 $headers = [
-    'User-Agent: Happ/4.3.0',
+    'User-Agent: Happ/4.4.1',
     'X-Device-Os: Android',
     'X-Device-Locale: ru',
     'X-Device-Model: ELP-NX1',
@@ -287,7 +287,7 @@ $result = array_values(array_unique($result));
 $output = implode("\n", $result);
 
 // Убираем лишние пробелы/переносы
-$encoded = trim($output);
+$encoded = base64_encode(trim($output));
 
 // Чистый вывод
 if (ob_get_length()) {

@@ -18,7 +18,7 @@ $hwid = substr(md5(strtolower($mac)), 0, 17);
 
 // Заголовки запроса к подписке
 $headers = [
-    'User-Agent: Happ/4.4.1',
+    'User-Agent: Happ/4.7.1',
     'X-Device-Os: Android',
     'X-Device-Locale: ru',
     'X-Device-Model: ELP-NX1',
@@ -43,7 +43,7 @@ curl_setopt_array($ch, [
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_MAXREDIRS => 5,
 
-    CURLOPT_CONNECTTIMEOUT => 10,
+    CURLOPT_CONNECTTIMEOUT => 60,
     CURLOPT_TIMEOUT => $timeout,
 
     CURLOPT_ENCODING => '',
@@ -287,7 +287,7 @@ $result = array_values(array_unique($result));
 $output = implode("\n", $result);
 
 // Убираем лишние пробелы/переносы
-$encoded = base64_encode(trim($output));
+$encoded = base64_encode(trim($output)); // base64_encode нужен под sing-box, если v2raya - убрать
 
 // Чистый вывод
 if (ob_get_length()) {

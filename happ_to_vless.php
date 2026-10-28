@@ -27,11 +27,12 @@ $headers = [
     'X-Hwid: ' . $hwid,
 ];
 
-$timeout = 30;
+$base64 = filter_var($_GET['base64'] ?? 'true', FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+if ($base64 === null) $base64 = true;
 
 $url = $_GET['url'] ?? '';
 if (!$url) {
-    die('Чтобы раскурить подписку Happ построчно в vless:// формат, введите:<br>http://[IP морды роутера]/happ_to_vless.php?url=[Ваша ссылка на подписку]');
+    die('Чтобы раскурить подписку Happ построчно в список серверов, введите:<br>http://[IP морды роутера]/happ_to_vless.php?base64=true|false&url=[Ваша ссылка на подписку как есть]<br>Задайте параметр парсера (упаковка выдачи списка в base64) base64=true - для sing-box и его аналогов, base64=false - для V2RayA');
 }
 
 // Запрос к подписке
@@ -44,7 +45,7 @@ curl_setopt_array($ch, [
     CURLOPT_MAXREDIRS => 5,
 
     CURLOPT_CONNECTTIMEOUT => 60,
-    CURLOPT_TIMEOUT => $timeout,
+    CURLOPT_TIMEOUT => 30,
 
     CURLOPT_ENCODING => '',
 
@@ -133,8 +134,14 @@ foreach ($json as $item) {
             }
 
             if ($type === 'grpc') {
-                $params['serviceName'] = 'grpc';
-                $params['mode'] = 'gun';
+                $grpc = $stream['grpcSettings'] ?? [];
+                $params['serviceName'] = $grpc['serviceName'] ?? '';
+                if (!empty($grpc['authority'])) {
+                    $params['authority'] = $grpc['authority'];
+                }
+                if (!empty($grpc['mode'])) {
+                    $params['mode'] = $grpc['mode'] === true ? 'multi' : $grpc['mode'];
+                }
             }
 
             // Security
@@ -203,6 +210,36 @@ foreach ($json as $item) {
             $result[] = $link;
         }
 		
+        // HYSTERIA2
+        if ($protocol === 'hysteria2' || ($protocol === 'hysteria' && (($out['settings']['version'] ?? 0) == 2 || ($out['streamSettings']['hysteriaSettings']['version'] ?? 0) == 2))) {
+
+            $srv = $out['settings'] ?? [];
+            $stream = $out['streamSettings'] ?? [];
+            $hy = $stream['hysteriaSettings'] ?? [];
+            $tls = $stream['tlsSettings'] ?? [];
+
+            $addr = $srv['address'] ?? '';
+            $port = $srv['port'] ?? '';
+            $auth = $hy['auth'] ?? ($srv['password'] ?? ($srv['auth'] ?? ''));
+            if (!$addr || !$port || !$auth) continue;
+
+            $params = [];
+            $params['sni'] = $tls['serverName'] ?? $addr;
+            if (!empty($tls['fingerprint'])) {
+                $params['fp'] = $tls['fingerprint'];
+            }
+            if (!empty($tls['alpn'])) {
+                $params['alpn'] = implode(',', $tls['alpn']);
+            }
+            if (!empty($stream['finalmask'])) {
+                $params['fm'] = json_encode($stream['finalmask'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            }
+
+            $query = http_build_query($params);
+            $link = "hysteria2://{$auth}@{$addr}:{$port}/?{$query}#" . rawurlencode($remark);
+            $result[] = $link;
+        }
+
 		// SHADOWSOCKS
 		if ($protocol === 'shadowsocks') {
 
@@ -284,10 +321,8 @@ $result = array_filter($result, function($v) {
 $result = array_values(array_unique($result));
 
 // Формируем список
-$output = implode("\n", $result);
-
-// Убираем лишние пробелы/переносы
-$encoded = base64_encode(trim($output)); // base64_encode нужен под sing-box, если v2raya - убрать
+$output = trim(implode("\n", $result));
+$encoded = $base64 ? base64_encode($output) : $output;
 
 // Чистый вывод
 if (ob_get_length()) {

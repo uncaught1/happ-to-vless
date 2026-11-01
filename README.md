@@ -21,29 +21,29 @@
 
 `Для OpenWrt 24.10 и ниже`
 ```bash
-  opkg update
-  opkg install php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
+opkg update
+opkg install php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
 ```
 `Для OpenWrt 25.12`
 ```bash
-  apk update
-  apk add php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
+apk update
+apk add php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
 ```
 
 ### Увеличение памяти, выделяемой роутером для php
 ```bash
-  nano /etc/php.ini
+nano /etc/php.ini
 ```
 В строке `memory_limit = 8M` поменять на 16M (либо больше, для больших подписок)
 
 ### Установка самого скрипта
 ```bash
-  wget https://uncaught1.github.io/happ-to-vless/happ_to_vless.php -O /www/happ_to_vless.php
+wget https://uncaught1.github.io/happ-to-vless/happ_to_vless.php -O /www/happ_to_vless.php
 ```
 
 ### Перезапуск веб-сервера роутера
 ```bash
-  /etc/init.d/uhttpd restart
+/etc/init.d/uhttpd restart
 ```
 
 ### Проверка работы скрипта

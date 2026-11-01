@@ -14,15 +14,15 @@ if (!$mac) {
     $mac = php_uname('n');
 }
 
-$hwid = substr(md5(strtolower($mac)), 0, 17);
+$hwid = substr(md5(strtolower($mac)), 0, 12);
 
 // Заголовки запроса к подписке
 $headers = [
     'User-Agent: Happ/4.9.0',
     'X-Device-Os: Android',
     'X-Device-Locale: ru',
-    'X-Device-Model: ELP-NX1',
-    'X-Ver-Os: 15',
+    'X-Device-Model: SM-S942B',
+    'X-Ver-Os: 16',
     'Connection: close',
     'X-Hwid: ' . $hwid,
 ];

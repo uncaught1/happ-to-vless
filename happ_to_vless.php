@@ -18,7 +18,7 @@ $hwid = substr(md5(strtolower($mac)), 0, 12);
 
 // Заголовки запроса к подписке
 $headers = [
-    'User-Agent: Happ/4.9.0',
+    'User-Agent: Happ/4.11.2',
     'X-Device-Os: Android',
     'X-Device-Locale: ru',
     'X-Device-Model: SM-S942B',
@@ -45,7 +45,7 @@ curl_setopt_array($ch, [
     CURLOPT_MAXREDIRS => 5,
 
     CURLOPT_CONNECTTIMEOUT => 60,
-    CURLOPT_TIMEOUT => 30,
+    CURLOPT_TIMEOUT => 60,
 
     CURLOPT_ENCODING => '',
 

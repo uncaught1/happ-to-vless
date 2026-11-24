@@ -36,6 +36,15 @@ nano /etc/php.ini
 ```
 В строке `memory_limit = 8M` поменять на 16M (либо больше, для больших подписок)
 
+### Добавить интерпретатор php в веб-сервер
+```bash
+nano /etc/config/uhttpd
+```
+В секции `config uhttpd 'main'` добавить следующую строку:
+```bash
+list interpreter '.php=/usr/bin/php-cgi'
+```
+
 ### Установка самого скрипта
 ```bash
 wget https://uncaught1.github.io/happ-to-vless/happ_to_vless.php -O /www/happ_to_vless.php
@@ -53,7 +62,7 @@ wget https://uncaught1.github.io/happ-to-vless/happ_to_vless.php -O /www/happ_to
 
 Если открывается небольшая текстовая инструкция - php работает и скрипт установлен
 
-### Добавление подписки через скрипт в VPN клиент OpenWrt
+### Добавление подписки через скрипт в VPN-клиент OpenWrt
 Скрипт поддерживает кодирование списка в base64, для выбора режима используется выражение прямо в ссылке `base64=true` или `base64=false`
 
 Пример данного параметра для популярных VPN-клиентов:

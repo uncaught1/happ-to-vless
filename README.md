@@ -22,12 +22,12 @@
 `Для OpenWrt 24.10 и ниже`
 ```bash
 opkg update
-opkg install php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
+opkg install nano php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
 ```
 `Для OpenWrt 25.12`
 ```bash
 apk update
-apk add php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
+apk add nano php8 php8-cgi php8-mod-curl php8-mod-mbstring php8-mod-filter
 ```
 
 ### Увеличение памяти, выделяемой роутером для php
